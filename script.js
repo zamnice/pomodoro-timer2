@@ -9,18 +9,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const themeBtns = document.querySelectorAll('.theme-btn');
     const settingsBtn = document.getElementById('settings-btn');
     const settingsModal = document.getElementById('settings-modal');
-    const closeBtn = document.querySelector('.close-btn');
+    const closeBtn = settingsModal.querySelector('.close-btn'); // More specific selector
     const saveSettingsBtn = document.getElementById('save-settings');
     const alarmSound = document.getElementById('alarm-sound');
+    const timerDisplay = document.querySelector('.timer-display'); // For pulsating effect
     
     // Timer variables
     let timer;
-    let totalSeconds = 25 * 60; // Default pomodoro time
-    let remainingSeconds = totalSeconds;
+    let totalSeconds; // Will be set based on currentMode and settings
+    let remainingSeconds;
     let isRunning = false;
-    let currentMode = 'pomodoro';
+    let currentMode = 'pomodoro'; // Default mode
     
-    // Timer settings
+    // Timer settings (default values)
     let settings = {
         pomodoro: 25,
         shortBreak: 5,
@@ -31,10 +32,22 @@ document.addEventListener('DOMContentLoaded', function() {
     if (localStorage.getItem('pomodoroSettings')) {
         settings = JSON.parse(localStorage.getItem('pomodoroSettings'));
     }
-    
-    // Initialize timer
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('selectedTheme');
+    if (savedTheme) {
+        document.body.setAttribute('data-theme', savedTheme);
+        // Ensure the correct theme button is highlighted if needed, but not critical for functionality
+    } else {
+        // Set a default theme if none is saved
+        document.body.setAttribute('data-theme', 'nature');
+    }
+
+    // Initialize timer with default or saved mode
+    switchMode(currentMode, false); // Initialize without resetting settings just yet
     updateDisplay();
-    
+    initFavicon(); // Initialize favicon
+
     // Event Listeners
     startBtn.addEventListener('click', startTimer);
     pauseBtn.addEventListener('click', pauseTimer);
@@ -52,13 +65,26 @@ document.addEventListener('DOMContentLoaded', function() {
     closeBtn.addEventListener('click', closeSettings);
     saveSettingsBtn.addEventListener('click', saveSettings);
     
-    // Timer functions
+    // Close modal when clicking outside
+    window.addEventListener('click', (event) => {
+        if (event.target === settingsModal) {
+            closeSettings();
+        }
+    });
+    
+    // Request notification permission on page load
+    if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+        Notification.requestPermission();
+    }
+
+    // --- Timer functions ---
     function startTimer() {
         if (!isRunning) {
             isRunning = true;
             timer = setInterval(updateTimer, 1000);
             startBtn.disabled = true;
             pauseBtn.disabled = false;
+            timerDisplay.classList.add('pulsate'); // Add pulsating effect
         }
     }
     
@@ -67,18 +93,32 @@ document.addEventListener('DOMContentLoaded', function() {
         isRunning = false;
         startBtn.disabled = false;
         pauseBtn.disabled = true;
+        timerDisplay.classList.remove('pulsate'); // Remove pulsating effect
     }
     
     function resetTimer() {
         pauseTimer();
+        switch (currentMode) {
+            case 'pomodoro':
+                totalSeconds = settings.pomodoro * 60;
+                break;
+            case 'short-break':
+                totalSeconds = settings.shortBreak * 60;
+                break;
+            case 'long-break':
+                totalSeconds = settings.longBreak * 60;
+                break;
+        }
         remainingSeconds = totalSeconds;
         updateDisplay();
+        updateFavicon(Math.floor(remainingSeconds / 60), remainingSeconds % 60);
     }
     
     function updateTimer() {
         if (remainingSeconds > 0) {
             remainingSeconds--;
             updateDisplay();
+            updateFavicon(Math.floor(remainingSeconds / 60), remainingSeconds % 60);
         } else {
             timerComplete();
         }
@@ -99,31 +139,38 @@ document.addEventListener('DOMContentLoaded', function() {
         // Notify user
         if (Notification.permission === 'granted') {
             new Notification('Timer Completed!', {
-                body: `Your ${currentMode} timer has finished!`,
-                icon: 'assets/images/icon.png'
+                body: `Your ${currentMode.replace('-', ' ')} timer has finished!`,
+                icon: 'assets/images/icon.png' // Ensure you have an icon in this path
             });
         } else if (Notification.permission !== 'denied') {
             Notification.requestPermission().then(permission => {
                 if (permission === 'granted') {
                     new Notification('Timer Completed!', {
-                        body: `Your ${currentMode} timer has finished!`,
+                        body: `Your ${currentMode.replace('-', ' ')} timer has finished!`,
                         icon: 'assets/images/icon.png'
                     });
                 }
             });
         }
         
-        // Auto-switch mode if pomodoro completes
+        // Auto-switch mode
         if (currentMode === 'pomodoro') {
-            // You can add logic here to count pomodoros and switch to long break after 4
+            // Basic auto-switch to short break
             setTimeout(() => {
                 switchMode('short-break');
-                startTimer();
+                // You might want to auto-start the next timer here, or let the user decide
+                // startTimer(); 
+            }, 1000);
+        } else {
+            // After a break, switch back to pomodoro
+            setTimeout(() => {
+                switchMode('pomodoro');
+                // startTimer(); 
             }, 1000);
         }
     }
     
-    function switchMode(mode) {
+    function switchMode(mode, resetCurrentSettings = true) {
         currentMode = mode;
         
         // Update active button
@@ -135,19 +182,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // Set timer based on mode
-        switch (mode) {
-            case 'pomodoro':
-                totalSeconds = settings.pomodoro * 60;
-                break;
-            case 'short-break':
-                totalSeconds = settings.shortBreak * 60;
-                break;
-            case 'long-break':
-                totalSeconds = settings.longBreak * 60;
-                break;
+        if (resetCurrentSettings) {
+            resetTimer(); // Resets timer and updates totalSeconds based on new mode
+        } else {
+            // Initial load, just set totalSeconds
+            switch (mode) {
+                case 'pomodoro':
+                    totalSeconds = settings.pomodoro * 60;
+                    break;
+                case 'short-break':
+                    totalSeconds = settings.shortBreak * 60;
+                    break;
+                case 'long-break':
+                    totalSeconds = settings.longBreak * 60;
+                    break;
+            }
+            remainingSeconds = totalSeconds; // Ensure remainingSeconds is also set
         }
-        
-        resetTimer();
+        updateDisplay();
+        updateFavicon(Math.floor(totalSeconds / 60), 0); // Update favicon on mode switch
     }
     
     function switchTheme(theme) {
@@ -155,18 +208,12 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('selectedTheme', theme);
     }
     
-    // Load saved theme
-    const savedTheme = localStorage.getItem('selectedTheme');
-    if (savedTheme) {
-        document.body.setAttribute('data-theme', savedTheme);
-    }
-    
-    // Settings functions
+    // --- Settings functions ---
     function openSettings() {
         document.getElementById('pomodoro-time').value = settings.pomodoro;
         document.getElementById('short-break-time').value = settings.shortBreak;
         document.getElementById('long-break-time').value = settings.longBreak;
-        settingsModal.style.display = 'block';
+        settingsModal.style.display = 'flex'; // Use flex for centering
     }
     
     function closeSettings() {
@@ -181,105 +228,44 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('pomodoroSettings', JSON.stringify(settings));
         
         // Update current timer if settings changed for current mode
-        switch (currentMode) {
-            case 'pomodoro':
-                totalSeconds = settings.pomodoro * 60;
-                break;
-            case 'short-break':
-                totalSeconds = settings.shortBreak * 60;
-                break;
-            case 'long-break':
-                totalSeconds = settings.longBreak * 60;
-                break;
-        }
-        
-        resetTimer();
+        // This will ensure the timer reflects new settings immediately
+        resetTimer(); 
         closeSettings();
     }
 
-    // Auto-show bubble text setelah 5 detik
-setTimeout(() => {
-  const bubble = document.querySelector('.whatsapp-bubble');
-  bubble.classList.add('show-text');
-}, 5000);
-
-// Inisialisasi favicon dengan nilai dari timer
-function initFavicon() {
-  if (!document.getElementById('dynamic-favicon')) {
-    const link = document.createElement('link');
-    link.id = 'dynamic-favicon';
-    link.rel = 'icon';
-    link.type = 'image/svg+xml';
-    document.head.appendChild(link);
-  }
-  const initialMinutes = Math.floor(totalSeconds / 60);
-  updateFavicon(initialMinutes, 0);
-}
-
-// Update favicon sesuai mode
-function updateFavicon(minutes, seconds) {
-  const isBreak = currentMode !== 'pomodoro';
-  const color = isBreak ? '#4CAF50' : '#ff6b6b';
-  
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="48" fill="${color}"/>
-      <text x="50" y="68" font-size="50" text-anchor="middle" fill="white">
-        ${minutes}:${seconds.toString().padStart(2, '0').slice(0,2)}
-      </text>
-    </svg>
-  `;
-  
-  document.getElementById('dynamic-favicon').href = 
-    `data:image/svg+xml,${encodeURIComponent(svg)}`;
-}
-
-// Cek localStorage saat halaman dimuat
-document.addEventListener('DOMContentLoaded', function() {
-  if (localStorage.getItem('hideNote') === 'true') {
-    document.querySelector('.sticky-note')?.remove();
-  }
-});
-
-// Saat tombol close diklik
-document.querySelector('.close-btn')?.addEventListener('click', function() {
-  const note = document.querySelector('.sticky-note');
-  
-  note.style.opacity = '0';
-  note.style.transform = 'translateY(20px) rotate(5deg)';
-  
-  setTimeout(() => {
-    note.remove();
-    localStorage.setItem('hideNote', 'true');
-  }, 300);
-});
-
-// Modifikasi switchMode
-function switchMode(mode) {
-  currentMode = mode;
-  modeBtns.forEach(btn => btn.classList.remove('active'));
-  document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
-
-  // Update timer settings
-  switch(mode) {
-    case 'pomodoro': totalSeconds = 25 * 60; break;
-    case 'short-break': totalSeconds = 5 * 60; break;
-    case 'long-break': totalSeconds = 10 * 60; break;
-  }
-
-  resetTimer();
-  updateFavicon(Math.floor(totalSeconds / 60), 0); // Update favicon
-}
-    
-    // Close modal when clicking outside
-    window.addEventListener('click', (event) => {
-        if (event.target === settingsModal) {
-            closeSettings();
+    // --- Favicon related functions ---
+    function initFavicon() {
+        if (!document.getElementById('dynamic-favicon')) {
+            const link = document.createElement('link');
+            link.id = 'dynamic-favicon';
+            link.rel = 'icon';
+            link.type = 'image/svg+xml';
+            document.head.appendChild(link);
         }
-    });
-    
-    // Request notification permission on page load
-    if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
-        Notification.requestPermission();
+        // Initialize with current timer state
+        updateFavicon(Math.floor(remainingSeconds / 60), remainingSeconds % 60);
+    }
+
+    function updateFavicon(minutes, seconds) {
+        const isBreak = currentMode !== 'pomodoro';
+        // Get color from the current theme's primary color, or a default if not found
+        const themePrimaryColor = getComputedStyle(document.body).getPropertyValue('--primary-color');
+        const color = isBreak ? '#4CAF50' : themePrimaryColor; // Green for break, theme's primary for pomodoro
+
+        // Ensure seconds are always two digits
+        const formattedSeconds = seconds.toString().padStart(2, '0');
+        
+        const svg = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                <rect width="100" height="100" fill="${color}"/>
+                <text x="50%" y="68%" font-family="Poppins, sans-serif" font-size="50" text-anchor="middle" dominant-baseline="middle" fill="white">
+                    ${minutes}:${formattedSeconds}
+                </text>
+            </svg>
+        `;
+        
+        document.getElementById('dynamic-favicon').href = `data:image/svg+xml,${encodeURIComponent(svg)}`;
     }
 });
+
+        
