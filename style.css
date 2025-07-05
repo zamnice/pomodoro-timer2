@@ -51,28 +51,30 @@ body {
     transition: all 0.3s ease;
     min-height: 100vh;
     display: flex;
+    flex-direction: column; /* Changed to column to accommodate footer */
     justify-content: center;
     align-items: center;
-    background-image: url('assets/img/nature-bg.jpg');
+    background-image: url('assets/img/nature-bg.jpg'); /* Default background */
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
 }
 
+/* Theme-specific background images from Pexels (placeholder URLs, replace with your downloaded images) */
 body[data-theme="nature"] {
-    background-image: url('assets/img/nature-bg.jpg');
+    background-image: url('assets/img/nature-bg.jpg'); /* e.g., from Pexels: https://www.pexels.com/photo/green-trees-1456951/ */
 }
 
 body[data-theme="coffee"] {
-    background-image: url('assets/img/coffee-bg.jpg');
+    background-image: url('assets/img/coffee-bg.jpg'); /* e.g., from Pexels: https://www.pexels.com/photo/coffee-beans-and-coffee-cup-on-wooden-table-7182594/ */
 }
 
 body[data-theme="night"] {
-    background-image: url('assets/img/night-bg.jpg');
+    background-image: url('assets/img/night-bg.jpg'); /* e.g., from Pexels: https://www.pexels.com/photo/starry-night-sky-over-mountains-1279813/ */
 }
 
 body[data-theme="beach"] {
-    background-image: url('assets/img/beach-bg.jpg');
+    background-image: url('assets/img/beach-bg.jpg'); /* e.g., from Pexels: https://www.pexels.com/photo/sea-and-coastline-313782/ */
 }
 
 .container {
@@ -85,6 +87,7 @@ body[data-theme="beach"] {
     text-align: center;
     backdrop-filter: blur(5px);
     border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: 20px; /* Space for the footer */
 }
 
 body[data-theme="night"] .container {
@@ -149,7 +152,25 @@ body[data-theme="night"] .container {
     font-weight: 300;
     margin: 1.5rem 0;
     color: var(--primary-color);
+    transition: transform 0.2s ease-in-out; /* For pulsating effect */
 }
+
+/* Pulsating effect for timer display */
+.timer-display.pulsate {
+    animation: pulsate-animation 1s infinite alternate;
+}
+
+@keyframes pulsate-animation {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
+}
+
 
 .timer-controls {
     display: flex;
@@ -183,20 +204,19 @@ body[data-theme="night"] .container {
 }
 
 .spotify-player {
-    margin: 1.5rem auto; /* Pusatkan horizontal */
-    width: 85%; /* Sesuaikan lebar */
-    max-width: 300px; /* Maksimal lebar */
+    margin: 1.5rem auto;
+    width: 85%;
+    max-width: 300px;
     display: flex;
-    justify-content: center; /* Pusatkan konten */
+    justify-content: center;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* Untuk iframe Spotify */
 #spotify-iframe {
     display: block;
-    margin: 0 auto; /* Pastiin tengah */
+    margin: 0 auto;
     border: none;
 }
 
@@ -220,23 +240,27 @@ body[data-theme="night"] .container {
 .modal {
     display: none;
     position: fixed;
-    z-index: 1;
+    z-index: 1000; /* Increased z-index */
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
     overflow: auto;
     background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(3px);
+    display: flex; /* Centering content */
+    justify-content: center;
+    align-items: center;
 }
 
 .modal-content {
     background-color: var(--card-color);
-    margin: 15% auto;
     padding: 20px;
     border-radius: 10px;
     width: 90%;
     max-width: 400px;
     box-shadow: 0 5px 15px var(--shadow-color);
+    position: relative;
 }
 
 .close-btn {
@@ -245,6 +269,9 @@ body[data-theme="night"] .container {
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
+    position: absolute; /* Position close button */
+    top: 10px;
+    right: 20px;
 }
 
 .close-btn:hover {
@@ -286,6 +313,86 @@ body[data-theme="night"] .container {
     background-color: var(--secondary-color);
 }
 
+/* Floating WhatsApp Bubble */
+.whatsapp-bubble {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 999;
+}
+
+.whatsapp-bubble a {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.bubble-icon {
+    background: #25D366;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 30px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transition: all 0.3s;
+    animation: float 3s ease-in-out infinite;
+}
+
+.bubble-icon:hover {
+    transform: scale(1.1);
+}
+
+.bubble-text {
+    position: absolute;
+    right: 70px;
+    background: #25D366;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 24px;
+    font-weight: bold;
+    opacity: 0;
+    transform: translateX(10px); /* Initial position for slide-in */
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    white-space: nowrap;
+}
+
+.whatsapp-bubble:hover .bubble-text {
+    opacity: 1;
+    transform: translateX(0); /* Slide-in effect */
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Footer */
+.main-footer {
+    margin-top: auto; /* Push footer to the bottom */
+    padding: 15px;
+    text-align: center;
+    color: var(--text-color);
+    font-size: 0.9rem;
+    background-color: rgba(255, 255, 255, 0.7);
+    width: 100%;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+    backdrop-filter: blur(3px);
+}
+
+.main-footer a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.main-footer a:hover {
+    text-decoration: underline;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
     .timer-display {
@@ -300,146 +407,13 @@ body[data-theme="night"] .container {
     .title {
         font-size: 1.5rem;
     }
- /* Gaya dasar favicon */
-#dynamic-favicon {
-  transition: all 0.5s ease;
-}
 
-/* Warna berbeda untuk mode break */
-body.break-mode #dynamic-favicon svg circle {
-  fill: #4CAF50 !important;
-}
+    .bubble-text {
+        right: 80px; /* Adjust for smaller screens */
+    }
 
-    /* Floating Bubble */
-.whatsapp-bubble {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  z-index: 100;
-}
-
-.bubble-icon {
-  background: #25D366;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 30px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  transition: all 0.3s;
-}
-
-.bubble-text {
-  position: absolute;
-  right: 70px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: #25D366;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 24px;
-  font-weight: bold;
-  opacity: 0;
-  transition: opacity 0.3s;
-  white-space: nowrap;
-}
-
-.whatsapp-bubble:hover .bubble-text {
-  opacity: 1;
-}
-
-/* Animasi mengambang */
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
-.whatsapp-bubble {
-  animation: float 3s ease-in-out infinite;
-}
-
-.sticky-note {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  z-index: 100;
-  transition: all 0.3s ease-out;
-}
-
-.note-content {
-  background: #fff8c4;
-  color: #333;
-  padding: 12px 15px;
-  border-radius: 3px;
-  font-family: 'Poppins', sans-serif;
-  font-size: 13px;
-  max-width: 200px;
-  box-shadow: 3px 3px 10px rgba(0,0,0,0.2);
-  position: relative;
-  transform: rotate(-2deg);
-  border: 1px solid #e8e3c5;
-}
-
-.note-pin {
-  position: absolute;
-  top: -8px;
-  left: 50%;
-  width: 16px;
-  height: 16px;
-  background: #c33;
-  border-radius: 50%;
-  transform: translateX(-50%);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-.note-content p {
-  margin: 0;
-  line-height: 1.4;
-}
-    
-}
-@media (max-width: 600px) {
-  .copyright-footer {
-    font-size: 10px;
-    padding: 5px 0;
-  }
-  .sticky-note {
-    left: 10px;
-    bottom: 10px;
-  }
-    
-}.sticky-note {
-  animation: bounce 2s infinite;
-}
-@keyframes bounce {
-  0%, 100% { transform: translateY(0) rotate(-2deg); }
-  50% { transform: translateY(-5px) rotate(2deg); }
-    
-.close-btn {
-  position: absolute;
-  top: -10px;
-  right: -10px;
-  width: 25px;
-  height: 25px;
-  background: #ff6b6b;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  font-size: 16px;
-  cursor: pointer;
-  z-index: 101;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  transition: all 0.3s;
-}
-
-.close-btn:hover {
-  background: #ff4757;
-  transform: scale(1.1);
-}
-}
+    .main-footer {
+        font-size: 0.8rem;
+        padding: 10px;
+    }
+    }
