@@ -1,0 +1,43 @@
+# _config.yml
+
+# Pengaturan Dasar
+title: "Pastiow Pomodoro Timer"
+description: "Aesthetic Pomodoro Timer with Mixkit Alarm"
+baseurl: ""  # Sesuaikan jika ada subpath (e.g "/repo")
+url: ""       # Domain Anda (atau biarkan kosong untuk GitHub Pages)
+
+# Build Settings
+theme: minima
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag  # Untuk SEO otomatis
+
+# Custom Variables
+pomodoro_settings:
+  work_time: 25    # dalam menit
+  short_break: 5
+  long_break: 10
+  alarm_sound: "https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3"
+
+# Ekstensi yang akan diproses
+markdown: kramdown
+permalink: pretty
+
+# Collections (Opsional)
+collections:
+  themes:
+    output: true
+    permalink: /themes/:path/
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+      type: "themes"
+    values:
+      layout: "theme"
+
+# GitHub Pages Settings (Wajib untuk deploy)
+repository: username/username.github.io  # Ganti dengan repo Anda
+github:
+  branch: main
