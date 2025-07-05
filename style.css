@@ -44,6 +44,7 @@
     box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
 }
+
 body {
     background-color: var(--background-color);
     color: var(--text-color);
@@ -53,7 +54,7 @@ body {
     flex-direction: column; /* Mengatur arah flex menjadi kolom */
     justify-content: center; /* Pusatkan konten secara vertikal */
     align-items: center; /* Pusatkan konten secara horizontal */
-    background-image: url('assets/img/default-bg.jpg');
+    background-image: url('assets/img/nature-bg.jpg');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
