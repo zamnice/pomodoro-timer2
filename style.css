@@ -54,7 +54,7 @@ body {
     flex-direction: column; /* Mengatur arah flex menjadi kolom */
     justify-content: center; /* Pusatkan konten secara vertikal */
     align-items: center; /* Pusatkan konten secara horizontal */
-    background-image: url('assets/img/nature-bg.jpg');
+    background-image: url('assets/img/nature-bg.jpg'); /* Pastikan path gambar benar */
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
@@ -62,22 +62,36 @@ body {
 
 /* Theme-specific background images from Pexels (placeholder URLs, replace with your downloaded images) */
 body[data-theme="nature"] {
-    background-image: url('assets/img/nature-bg.jpg'); /* e.g., from Pexels: https://www.pexels.com/photo/green-trees-1456951/ */
+    background-image: url('assets/img/nature-bg.jpg');
 }
 
 body[data-theme="coffee"] {
-    background-image: url('assets/img/coffee-bg.jpg'); /* e.g., from Pexels: https://www.pexels.com/photo/coffee-beans-and-coffee-cup-on-wooden-table-7182594/ */
+    background-image: url('assets/img/coffee-bg.jpg');
 }
 
 body[data-theme="night"] {
-    background-image: url('assets/img/night-bg.jpg'); /* e.g., from Pexels: https://www.pexels.com/photo/starry-night-sky-over-mountains-1279813/ */
+    background-image: url('assets/img/night-bg.jpg');
 }
 
 body[data-theme="beach"] {
-    background-image: url('assets/img/beach-bg.jpg'); /* e.g., from Pexels: https://www.pexels.com/photo/sea-and-coastline-313782/ */
+    background-image: url('assets/img/beach-bg.jpg');
 }
 
-or the footer */
+.container {
+    background-color: rgba(255, 255, 255, 0.85);
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px var(--shadow-color);
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    /* Tambahkan margin auto untuk memastikan pemusatan yang kuat jika ada sisa ruang */
+    margin-top: auto;
+    margin-bottom: auto;
+    /* Margin tambahan untuk menjaga jarak dari footer jika dibutuhkan, bisa disesuaikan */
+    margin-bottom: 20px; 
 }
 
 body[data-theme="night"] .container {
@@ -102,23 +116,7 @@ body[data-theme="night"] .container {
     background: none;
     border: none;
     font-size: 1.2rem;
-    cursor: point
-    
-.container {
-    background-color: rgba(255, 255, 255, 0.85);
-    padding: 2rem;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px var(--shadow-color);
-    width: 90%;
-    max-width: 500px;
-    text-align: center;
-    backdrop-filter: blur(5px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    /* Hapus margin-bottom jika ada yang menyebabkan masalah */
-    /* margin-bottom: 20px; */ 
-    /* Tambahkan margin auto untuk memastikan pemusatan yang kuat jika ada sisa ruang */
-    margin-top: auto; 
-    margin-bottom: auto;r;
+    cursor: pointer; /* Diperbaiki dari 'point' menjadi 'pointer' */
     color: var(--text-color);
     padding: 5px 10px;
     border-radius: 50%;
@@ -244,9 +242,12 @@ body[data-theme="night"] .container {
 
 /* Modal Styles */
 .modal {
-    display: none;
+    /* Perhatikan: properti 'display: flex;' di sini akan menimpa 'display: none;' */
+    /* Saat modal tidak aktif, sebaiknya display: none. Saat aktif, baru display: flex */
+    /* Namun, di sini saya akan biarkan untuk pemusatan yang kuat saat dipanggil dari JS */
+    display: none; 
     position: fixed;
-    z-index: 1000; /* Increased z-index */
+    z-index: 1000;
     left: 0;
     top: 0;
     width: 100%;
@@ -254,8 +255,7 @@ body[data-theme="night"] .container {
     overflow: auto;
     background-color: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(3px);
-    display: flex; /* Centering content */
-    justify-content: center;
+    justify-content: center; /* Centering content */
     align-items: center;
 }
 
@@ -271,7 +271,7 @@ body[data-theme="night"] .container {
 
 .close-btn {
     color: #aaa;
-    float: right;
+    /* float: right; <- Hapus float jika menggunakan absolute positioning */
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
@@ -422,4 +422,4 @@ body[data-theme="night"] .container {
         font-size: 0.8rem;
         padding: 10px;
     }
-    }
+        }
